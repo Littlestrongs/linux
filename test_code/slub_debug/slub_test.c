@@ -5,11 +5,16 @@
 
 static char *buf;
 
-static void create_slub_error(void)
+void create_slub_error(void)
 {
+  int i;
+
   buf = kmalloc(32, GFP_KERNEL);
   if(buf) {
-    memset(buf, 0x55, 36);
+    memset(buf, 0x55, 80);
+    for(i = 0; i < 80; i++) 
+      printk("%x ", *(buf+i));
+    printk("\n");
   }
 }
 

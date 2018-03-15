@@ -7,11 +7,11 @@ static char *buf;
 
 void create_slub_error(void)
 {
+  int i;
+
   buf = kmalloc(32, GFP_KERNEL);
   if(buf) {
-    memset(buf, 0x55, 32);
-    kfree(buf);
-    printk("al: Object already freed");
+    buf[-1] = 0x55;
     kfree(buf);
   }
 }
