@@ -319,28 +319,73 @@ static noinline void __init kasan_stack_oob(void)
 	*(volatile char *)p;
 }
 
+static noinline void __init kasan_double_free(void)
+{
+	char *ptr;
+	size_t size = 123;
+
+	pr_info("double free\n");
+	ptr = kmalloc(size, GFP_KERNEL);
+	if (!ptr) {
+		pr_err("Allocation failed\n");
+		return;
+	}
+
+	kfree(ptr);
+	kfree(ptr);
+}
+
+static noinline void __init kasan_memleak(void)
+{
+	char *ptr;
+	size_t size = 123;
+
+	pr_info("mem leak\n");
+	ptr = kmalloc(size, GFP_KERNEL);
+	ptr = kmalloc(size, GFP_KERNEL);
+	ptr = kmalloc(size, GFP_KERNEL);
+	if (!ptr) {
+		pr_err("Allocation failed\n");
+		return;
+	}
+
+	kfree(ptr);
+
+}
+
 static int __init kmalloc_tests_init(void)
 {
+	printk("al: kasan error test init\n");
 	kmalloc_oob_right();
-	kmalloc_oob_left();
-	kmalloc_node_oob_right();
-	kmalloc_large_oob_right();
-	kmalloc_oob_krealloc_more();
-	kmalloc_oob_krealloc_less();
-	kmalloc_oob_16();
-	kmalloc_oob_in_memset();
-	kmalloc_oob_memset_2();
-	kmalloc_oob_memset_4();
-	kmalloc_oob_memset_8();
-	kmalloc_oob_memset_16();
+	//kmalloc_oob_left();
+	//kmalloc_node_oob_right();
+	//kmalloc_large_oob_right();
+	//kmalloc_oob_krealloc_more();
+	//kmalloc_oob_krealloc_less();
+	//kmalloc_oob_16();
+	//kmalloc_oob_in_memset();
+	//kmalloc_oob_memset_2();
+	//kmalloc_oob_memset_4();
+	//kmalloc_oob_memset_8();
+	//kmalloc_oob_memset_16();
 	kmalloc_uaf();
-	kmalloc_uaf_memset();
-	kmalloc_uaf2();
+	//kmalloc_uaf_memset();
+	//kmalloc_uaf2();
 	kmem_cache_oob();
 	kasan_stack_oob();
 	kasan_global_oob();
-	return -EAGAIN;
+	kasan_double_free();
+
+	return 0;
 }
 
-module_init(kmalloc_tests_init);
+static int __exit kmalloc_tests_exit(void)
+{
+	printk("al: kasan error test exit\n");
+
+	return 0;
+}
+
 MODULE_LICENSE("GPL");
+module_init(kmalloc_tests_init);
+module_exit(kmalloc_tests_exit);
